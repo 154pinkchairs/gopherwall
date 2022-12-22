@@ -1,31 +1,24 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/asynkron/protoactor-go/actor"
 	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-	system := actor.NewActorSystem()
-	defer system.Terminate()
+//building an actor model based firewall's main file
+//
+type Firewall struct {
+}
 
-	//Set up actor to receive msgs from submodules
-	props := actor.FromFunc(func(context actor.Context) {
-		switch msg := context.Message().(type) {
-		case string:
-			fmt.Println(msg)
-		default:
-			log.Printf("received unknown message: %v", msg)
-		}
-	})
-	receiver, err := system.Root.CreateActor(props)
-	if err != nil {
-		log.Fatalf("error creating actor: %v", err)
+func (state *Firewall) Receive(context actor.Context) {
+	switch msg := context.Message().(type) {
+	case *actor.Started:
+		log.Info("Firewall started")
+	case *actor.Stopping:
+		log.Info("Firewall stopping")
+	case *actor.Stopped:
+		log.Info("Firewall stopped")
+	case *actor.Restarting:
+		log.Info("Firewall restarting")
 	}
-
-	//TODO: set up submods to send messages to actor
-
-	//wait for messages
-	system.AwaitTermination()
 }
