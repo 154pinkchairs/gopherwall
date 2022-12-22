@@ -5,7 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// building an actor model based firewall's main file
 type Firewall struct {
 }
 
@@ -19,5 +18,18 @@ func (state *Firewall) Receive(context actor.Context) {
 		log.Info("Firewall stopped")
 	case *actor.Restarting:
 		log.Info("Firewall restarting")
+	default:
+		log.Info("Firewall received unknown message")
+		_ = msg
+}
+}
+//listen to messages from the actors in the packages
+func main() {
+	context := actor.NewActorSystem().Root
+	props := actor.PropsFromProducer(func() actor.Actor { return &Firewall{} })
+	pid, err := context.SpawnNamed(props, "firewall")
+	if err != nil {
+		log.Fatal(err)
 	}
+	context.Send(pid, &actor.Started{})
 }
